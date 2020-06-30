@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="WASDungeons:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/WASDungeons_jar</output-path>
+    <root id="archive" name="WASDungeons.jar">
+      <element id="module-output" name="WASDungeons" />
+      <element id="module-test-output" name="WASDungeons" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/1stleg/jnativehook/2.1.0/jnativehook-2.1.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
