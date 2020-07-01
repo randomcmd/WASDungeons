@@ -20,6 +20,7 @@ public class ModKeyListener implements NativeKeyListener {
     public static int screenHeight = 1080;
     public static int screenWidth = 1920;
 
+    /*Handles Key Presses*/
     public void nativeKeyPressed(NativeKeyEvent e) {
 
         System.out.println("Pressed " + NativeKeyEvent.getKeyText(e.getKeyCode()));
@@ -69,18 +70,19 @@ public class ModKeyListener implements NativeKeyListener {
         if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
             try {
                 GlobalScreen.unregisterNativeHook();
-            } catch (NativeHookException nativeHookException) {
+            } catch (NativeHookException ignored) {
             }
         }
 
         try {
             doMouseInput();
-        } catch (AWTException awtException) {
+        } catch (AWTException ignored) {
 
         }
 
     }
 
+    /*Handles Key Releases*/
     public void nativeKeyReleased(NativeKeyEvent e) {
 
         System.out.println("Released " + NativeKeyEvent.getKeyText(e.getKeyCode()));
@@ -122,13 +124,14 @@ public class ModKeyListener implements NativeKeyListener {
         }
     }
 
+    /*IDK What that does but it was in the example*/
     public void nativeKeyTyped(NativeKeyEvent e) {
-        System.out.println("Key Typed: " + e.getKeyText(e.getKeyCode()));
+        System.out.println("Key Typed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
     }
 
     Robot robot;
     Dimension screenSize;
-    public static void main(String[] args) throws AWTException {
+    public static void main(String[] args) {
 
         // Get the logger for "org.jnativehook" and set the level to warning.
         Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
@@ -163,6 +166,7 @@ public class ModKeyListener implements NativeKeyListener {
         ModKeyListener.screenWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     }
 
+    /*Does the final mouse input*/
     Vector2D inputVector;
     public void doMouseInput() throws AWTException {
         if(pause) return;
@@ -177,6 +181,7 @@ public class ModKeyListener implements NativeKeyListener {
     int sInput;
     int dInput;
 
+    /*Turns wasd input into analog signal*/
     public Vector2D generateInputVector()
     {
         //Turn boolean into integer
@@ -189,8 +194,8 @@ public class ModKeyListener implements NativeKeyListener {
         //W plus A for example is the right upper corner of the screen
         Vector2D output = new Vector2D();
 
-        output.x = screenWidth/2 + aInput + dInput;
-        output.y = screenHeight/2 + wInput + sInput;
+        output.x = (screenWidth / 2) + aInput + dInput;
+        output.y = (screenHeight / 2) + wInput + sInput;
 
         return output;
     }
