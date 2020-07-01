@@ -5,6 +5,7 @@ import org.jnativehook.keyboard.NativeKeyListener;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.geom.Point2D;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,110 +18,74 @@ public class ModKeyListener implements NativeKeyListener {
     public Boolean pause = false;
 
     //Resoulution changes automatically laterw
-    public static int screenHeight = 1080;
-    public static int screenWidth = 1920;
+    public static int screenHeight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
+    public static int screenWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+    public static Point screenCentre = new Point(screenWidth/2,screenHeight/2);
+    public static Point mousePosPreMovement = new Point(screenWidth/2,screenHeight/2);
 
     /*Handles Key Presses*/
+    Boolean movementButtonPressed;
     public void nativeKeyPressed(NativeKeyEvent e) {
 
         System.out.println("Pressed " + NativeKeyEvent.getKeyText(e.getKeyCode()));
 
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("P")) { pause = !pause; }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("W")) { wPressed = true; }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("A")) { aPressed = true; }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("S")) { sPressed = true; }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("D")) { dPressed = true; }
+
         if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("W")
-            || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("A")
+                || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("A")
                 || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("S")
-                    || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("D"))
+                || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("D"))
         {
+            movementButtonPressed = true;
             try {
                 robot = new Robot();
-            } catch (AWTException awtException) {
-                awtException.printStackTrace();
-            }
-            robot.mousePress(InputEvent.BUTTON1_MASK);
+                //mousePosPreMovement = MouseInfo.getPointerInfo().getLocation();
+                doMouseInput();
+                robot.mousePress(InputEvent.BUTTON1_MASK);
+            } catch (Exception ignored) { }
         }
-
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("P"))
-        {
-            pause = !pause;
-        }
-
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("W"))
-        {
-            //Pressed W
-            wPressed = true;
-        }
-
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("A"))
-        {
-            //Pressed A
-            aPressed = true;
-        }
-
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("S"))
-        {
-            //Pressed S
-            sPressed = true;
-        }
-
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("D"))
-        {
-            //Pressed D
-            dPressed = true;
-        }
-
-        if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
-            try {
-                GlobalScreen.unregisterNativeHook();
-            } catch (NativeHookException ignored) {
-            }
-        }
-
-        try {
-            doMouseInput();
-        } catch (AWTException ignored) {
-
-        }
-
+        else{ movementButtonPressed = false; }
     }
 
     /*Handles Key Releases*/
+    Boolean movementButtonLetGo;
     public void nativeKeyReleased(NativeKeyEvent e) {
+
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("W")
+                || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("A")
+                || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("S")
+                || NativeKeyEvent.getKeyText(e.getKeyCode()).equals("D"))
+        {
+            movementButtonLetGo = true;
+        }
+        else{movementButtonLetGo = false;}
 
         System.out.println("Released " + NativeKeyEvent.getKeyText(e.getKeyCode()));
 
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("W"))
-        {
-            //Pressed W
-            wPressed = false;
-        }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("W")) { wPressed = false; }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("A")) { aPressed = false; }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("S")) { sPressed = false; }
+        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("D")) { dPressed = false; }
 
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("A"))
+        //If all movement keys are let go
+        if(!wPressed && !aPressed && !sPressed && !dPressed && movementButtonLetGo)
         {
-            //Pressed A
-            aPressed = false;
-        }
 
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("S"))
-        {
-            //Pressed S
-            sPressed = false;
-        }
-
-        if(NativeKeyEvent.getKeyText(e.getKeyCode()).equals("D"))
-        {
-            //Pressed D
-            dPressed = false;
-        }
-
-        if(!wPressed && !aPressed && !sPressed && !dPressed)
-        {
-            robot.mouseMove(screenWidth/2,screenHeight/2);
+            robot.mouseMove(screenCentre.x,screenCentre.y);
             robot.mouseRelease(InputEvent.BUTTON1_MASK);
+            //robot.mouseMove(mousePosPreMovement.x,mousePosPreMovement.y);
         }
-
-        try {
-            doMouseInput();
-        } catch (AWTException awtException) {
-            awtException.printStackTrace();
+        else{ if(movementButtonLetGo) {
+            try {
+                doMouseInput();
+            } catch (AWTException awtException) {
+                awtException.printStackTrace();
+            }
+        }
         }
     }
 
@@ -162,12 +127,10 @@ public class ModKeyListener implements NativeKeyListener {
         } catch (AWTException e) {
             e.printStackTrace();
         }
-        ModKeyListener.screenHeight = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-        ModKeyListener.screenWidth = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth();
     }
 
     /*Does the final mouse input*/
-    Vector2D inputVector;
+    Point inputVector;
     public void doMouseInput() throws AWTException {
         if(pause) return;
         inputVector = generateInputVector();
@@ -182,7 +145,7 @@ public class ModKeyListener implements NativeKeyListener {
     int dInput;
 
     /*Turns wasd input into analog signal*/
-    public Vector2D generateInputVector()
+    public Point generateInputVector()
     {
         //Turn boolean into integer
         wInput = wPressed ? (screenHeight/2) * -1 : 0;
@@ -192,7 +155,7 @@ public class ModKeyListener implements NativeKeyListener {
 
         //Turns key input into screen position
         //W plus A for example is the right upper corner of the screen
-        Vector2D output = new Vector2D();
+        Point output = new Point();
 
         output.x = (screenWidth / 2) + aInput + dInput;
         output.y = (screenHeight / 2) + wInput + sInput;
