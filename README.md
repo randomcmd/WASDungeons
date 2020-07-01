@@ -1,3 +1,4 @@
+![WADungeons Banner](https://imgur.com/download/4KkwL7n)
 # WASDungeons Mod for Minecraft Dungeons
 
 Since the release of Minecraft Dungeons a lot of players have been wondering if Mojang will ever add support for WASD controlls. Well you don't have to wait for Mojang now, because I am working to implement WASD Controls with this mod! The mod is only a overlay and is very similar to a macro and offers you no gameplay advantage.
